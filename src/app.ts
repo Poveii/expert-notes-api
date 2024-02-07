@@ -1,14 +1,10 @@
 import Fastify from "fastify"
 
-import { createNote } from "./routes/create-note"
-import { listNotes } from "./routes/list-notes"
-import { deleteNote } from "./routes/delete-note"
+import { notesRoutes } from "./routes/notes"
 
 const app = Fastify()
 
-app.register(createNote)
-app.register(listNotes)
-app.register(deleteNote)
+app.register(notesRoutes)
 
 try {
   await app.listen({ port: 3000 })
