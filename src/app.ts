@@ -1,9 +1,20 @@
 import Fastify from "fastify"
+import jwt from "@fastify/jwt"
+import cookies from "@fastify/cookie"
 
 import { notesRoutes } from "./routes/notes"
 import { authRoutes } from "./routes/auth"
 
 const app = Fastify()
+
+app.register(jwt, {
+  secret: process.env.SECRET_JWT_TOKEN,
+})
+
+app.register(cookies, {
+  secret: process.env.SECRET_COOKIE_TOKEN,
+  hook: 'onRequest',
+})
 
 app.register(notesRoutes)
 app.register(authRoutes)
