@@ -20,7 +20,17 @@ export async function authRoutes(app: FastifyInstance) {
     if (!password) 
       return reply.status(400).send({ message: "Você não enviou a senha." })
 
-    // TODO: Antes de criar um usuário, verificar se ele já existe no DB.
+    const user = await prisma.user.findUnique({
+      where: {
+        username: username,
+      }
+    })
+
+    const isAlreadyHasAUser = !!user
+
+    if (isAlreadyHasAUser) {
+      return reply.status(400).send({ message: "Você já tem uma conta. Faça o login." })
+    }
 
     await prisma.user.create({
       data: {
