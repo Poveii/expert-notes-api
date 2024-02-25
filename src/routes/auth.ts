@@ -20,6 +20,8 @@ export async function authRoutes(app: FastifyInstance) {
     if (!password) 
       return reply.status(400).send({ message: "Você não enviou a senha." })
 
+    // TODO: Antes de criar um usuário, verificar se ele já existe no DB.
+
     await prisma.user.create({
       data: {
         name,
@@ -32,6 +34,35 @@ export async function authRoutes(app: FastifyInstance) {
   })
 
   app.post("/auth/login", async (req, reply) => {
-    // TODO
+    const loginAuthBody = z.object({
+      username: z.string(),
+      password: z.string(),
+    })
+
+    const { username, password } = loginAuthBody.parse(req.body)
+
+    const user = await prisma.user.findUnique({
+      where: {
+        username: username,
+        password: password,
+      }
+    })
+
+    if (!user) return reply.status(400).send({
+      message: "Usuário não encontrado. Verifique os dados enviados."
+    })
+
+    const { id } = user
+
+    const token = app.jwt.sign({ id })
+
+    return reply
+      .setCookie("authToken", token, {
+        path: "/",
+        httpOnly: true,
+        maxAge: 60 * 60 * 24 * 15, // 15 days
+      })
+      .status(200)
+      .send({ user })
   })
 }
